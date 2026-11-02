@@ -1,0 +1,29 @@
+services:
+  proxy:
+    build: ./proxy
+    environment:
+      PORT: 8080
+      UPSTREAM: http://httpbin:8081
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+    ports:
+      - "80:8080"
+    networks:
+      - public
+      - internal
+    depends_on:
+      - httpbin
+
+  httpbin:
+    image: ghcr.io/mccutchen/go-httpbin
+    environment:
+      PORT: 8081
+    # No "ports" section: httpbin is not published on the host and is only
+    # reachable through the internal network.
+    networks:
+      - internal
+
+networks:
+  public:
+  internal:
+    # Containers on this network have no route to or from the outside world.
+    internal: true
